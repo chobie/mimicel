@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package testproto;
+
+message SimpleTestMessage {
+  string string_field = 1;
+  int64 int_field = 2;
+  bool bool_field = 3;
+  repeated string repeated_string_field = 4;
+}
+
+message NestedTestMessage {
+  SimpleTestMessage simple_message = 1;
+  string description = 2;
+}
+
+message EqualityMessage {
+  string name = 1;
+  int64 age = 2;
+}

@@ -1,0 +1,39 @@
+[project]
+name = "mimicel"
+version = "0.0.1"
+description = "A CEL (Common Expression Language) compliant expression engine for Python"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+keywords = ["cel", "common expression language"]
+authors = [
+  { name = "Shuhei Tanuma", email = "shuhei.tanuma@gmail.com" }
+]
+
+dependencies = [
+    "antlr4-python3-runtime>=4.13.2",
+    "protobuf>=6.30.2",
+    "google-re2>=1.1.20240702",
+    "googleapis-common-protos>=1.70.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mimicel*"]
+
+[project.optional-dependencies]
+dev = [
+    "mypy-protobuf>=3.6.0",
+    "pytest>=8.3.5",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = "-ra"
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "build>=1.2.2.post1",
+    "twine>=6.1.0",
+]

@@ -1,0 +1,18 @@
+package(default_visibility = ["//visibility:public"])
+load("@protobuf//bazel:py_proto_library.bzl", "py_proto_library")
+
+py_proto_library(
+    name = "cel_python_protos",
+    deps = [
+        "@@cel-spec+//proto/cel/expr:syntax_proto",
+        "@@cel-spec+//proto/cel/expr:checked_proto",
+        "@@cel-spec+//proto/cel/expr:eval_proto",
+        "@@cel-spec+//proto/cel/expr:value_proto",
+        "@@cel-spec+//proto/cel/expr:explain_proto",
+        "@@cel-spec+//proto/cel/expr/conformance:conformance_service_proto",
+        "@@cel-spec+//proto/cel/expr/conformance:env_config_proto",
+        "@@cel-spec+//proto/cel/expr/conformance/proto2:test_all_types_proto",
+        "@@cel-spec+//proto/cel/expr/conformance/proto3:test_all_types_proto",
+    ],
+)
+

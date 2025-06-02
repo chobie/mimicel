@@ -1,0 +1,40 @@
+load("@rules_python//python:defs.bzl", "py_library")
+
+genrule(
+    name = "generate_joda_antlr_files",
+    srcs = ["Joda.g4"],
+    outs = [
+        "JodaLexer.py",
+        "JodaParser.py",
+        "JodaVisitor.py",
+    ],
+    tools = ["@antlr4_tool//:antlr_jar"],
+    cmd = """
+      echo "Running ANTLR..."
+      cp $(location Joda.g4) Joda.g4
+      java -cp $(location @antlr4_tool//:antlr_jar) org.antlr.v4.Tool \
+        -Dlanguage=Python3 -visitor -no-listener \
+        -o $(RULEDIR) Joda.g4
+    """,
+    local = 1,
+    visibility = ["//visibility:public"],
+)
+
+py_library(
+    name = "joda_antlr_generated_py",
+    srcs = [":generate_joda_antlr_files"],
+    visibility = ["//visibility:public"],
+)
+
+py_library(
+    name = "joda",
+    srcs = glob(
+        ["**/*.py"],
+        exclude = ["**/test_*.py"],
+    ),
+    deps = [
+        ":joda_antlr_generated_py",
+        "@pypi//antlr4_python3_runtime",
+    ],
+    visibility = ["//visibility:public"],
+)

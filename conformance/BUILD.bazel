@@ -1,0 +1,34 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+
+py_binary(
+    name = "run_basic_test",
+    srcs = ["run_basic_test.py"],
+    data = [
+        "@cel-spec//tests/simple:testdata/plumbing.textproto",
+        "@cel-spec//tests/simple:testdata/basic.textproto",
+        "@cel-spec//tests/simple:testdata/comparisons.textproto",
+        "@cel-spec//tests/simple:testdata/conversions.textproto",
+        "@cel-spec//tests/simple:testdata/dynamic.textproto",
+        "@cel-spec//tests/simple:testdata/enums.textproto",
+        "@cel-spec//tests/simple:testdata/fields.textproto",
+        "@cel-spec//tests/simple:testdata/fp_math.textproto",
+        "@cel-spec//tests/simple:testdata/integer_math.textproto",
+        "@cel-spec//tests/simple:testdata/lists.textproto",
+        "@cel-spec//tests/simple:testdata/logic.textproto",
+        "@cel-spec//tests/simple:testdata/macros.textproto",
+        "@cel-spec//tests/simple:testdata/namespace.textproto",
+        "@cel-spec//tests/simple:testdata/parse.textproto",
+        "@cel-spec//tests/simple:testdata/proto2.textproto",
+        "@cel-spec//tests/simple:testdata/proto3.textproto",
+        "@cel-spec//tests/simple:testdata/string.textproto",
+        "@cel-spec//tests/simple:testdata/timestamps.textproto",
+        "@cel-spec//tests/simple:testdata/unknowns.textproto",
+    ],
+    deps = [
+        "@pypi//antlr4_python3_runtime",
+        "@pypi//google_re2",
+        "@pypi//protobuf",
+        "//mimicel:core",
+        "@cel-spec//proto/cel/expr:cel_expr_py_proto",
+    ],
+)

@@ -1,0 +1,40 @@
+load("@rules_python//python:defs.bzl", "py_library")
+
+genrule(
+    name = "generate_duration_antlr_files",
+    srcs = ["CelDuration.g4"],
+    outs = [
+        "CelDurationLexer.py",
+        "CelDurationParser.py",
+        "CelDurationVisitor.py",
+    ],
+    tools = ["@antlr4_tool//:antlr_jar"],
+    cmd = """
+      echo "Running ANTLR..."
+      cp $(location CelDuration.g4) CelDuration.g4
+      java -cp $(location @antlr4_tool//:antlr_jar) org.antlr.v4.Tool \
+        -Dlanguage=Python3 -visitor -no-listener \
+        -o $(RULEDIR) CelDuration.g4
+    """,
+    local = 1,
+    visibility = ["//visibility:public"],
+)
+
+py_library(
+    name = "duration_antlr_generated_py",
+    srcs = [":generate_duration_antlr_files"],
+    visibility = ["//visibility:public"],
+)
+
+py_library(
+    name = "duration",
+    srcs = glob(
+        ["**/*.py"],
+        exclude = ["**/test_*.py"],
+    ),
+    deps = [
+        ":duration_antlr_generated_py",
+        "@pypi//antlr4_python3_runtime",
+    ],
+    visibility = ["//visibility:public"],
+)

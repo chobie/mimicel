@@ -1,0 +1,44 @@
+# mimicel/BUILD.bazel
+
+load("@rules_python//python:defs.bzl", "py_library")
+
+genrule(
+    name = "generate_cel_antlr_files",
+    srcs = ["CEL.g4"],
+    outs = [
+        "CELLexer.py",
+        "CELParser.py",
+        "CELVisitor.py",
+    ],
+    tools = ["@antlr4_tool//:antlr_jar"],
+    cmd = """
+      echo "Running ANTLR..."
+      cp $(location CEL.g4) CEL.g4
+      java -cp $(location @antlr4_tool//:antlr_jar) org.antlr.v4.Tool \
+        -Dlanguage=Python3 -visitor -no-listener \
+        -o $(RULEDIR) CEL.g4
+    """,
+    local = 1,
+    visibility = ["//visibility:public"],
+)
+
+py_library(
+    name = "cel_antlr_generated_py",
+    srcs = [":generate_cel_antlr_files"],
+    visibility = ["//visibility:public"],
+)
+
+py_library(
+    name = "core",
+    srcs = glob(
+        ["**/*.py"],
+        exclude = ["**/test_*.py"],
+    ),
+    deps = [
+        ":cel_antlr_generated_py",
+        #"@pypi//antlr4_python3_runtime",
+        "//mimicel/duration:duration",
+        "//mimicel/joda:joda",
+    ],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,31 @@
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
+load("@rules_python//python:packaging.bzl", "py_wheel", "py_package")
+
+
+package(default_visibility = ["//visibility:public"])
+licenses(["notice"])  # Apache 2.0
+exports_files(["LICENSE"])
+
+py_binary(
+    name = "simple",
+    srcs = ["simple.py"],
+    deps = [
+        "@pypi//antlr4_python3_runtime",
+        "@pypi//google_re2",
+        "@pypi//protobuf",
+        "//mimicel:core",
+        "@cel-spec//proto/cel/expr:cel_expr_py_proto",
+    ],
+)
+
+py_binary(
+    name = "like-a-pydantic",
+    srcs = ["like-a-pydantic.py"],
+    deps = [
+        "@pypi//antlr4_python3_runtime",
+        "@pypi//google_re2",
+        "@pypi//protobuf",
+        "//mimicel:core",
+        "@cel-spec//proto/cel/expr:cel_expr_py_proto",
+    ],
+)

@@ -1,0 +1,65 @@
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
+load("@rules_python//python:packaging.bzl", "py_wheel", "py_package")
+
+
+package(default_visibility = ["//visibility:public"])
+licenses(["notice"])  # Apache 2.0
+exports_files(["LICENSE"])
+
+py_binary(
+    name = "main",
+    srcs = ["main.py"],
+    deps = [
+        "@pypi//antlr4_python3_runtime",
+        "@pypi//google_re2",
+        "@pypi//protobuf",
+        "//mimicel:core",
+        "@cel-spec//proto/cel/expr:cel_expr_py_proto",
+    ],
+)
+
+py_package(
+    name = "mimicel_pkg",
+    deps = [
+        "//mimicel:core",
+        "//mimicel:cel_antlr_generated_py",
+        "//mimicel/duration:duration",
+        "//mimicel/joda:joda",
+    ],
+    packages = ["mimicel"],
+)
+
+
+py_wheel(
+    name = "mimicel_wheel",
+    distribution = "mimicel",
+    version = "0.0.1.dev4",
+    python_tag = "py3",
+    platform = "any",
+    homepage = "https://github.com/chobie/mimicel",
+    summary = "A CEL (Common Expression Language) compliant expression engine for Python",
+    author = "Shuhei Tanuma",
+    author_email = "shuhei.tanuma@gmail.com",
+    license = "Apache-2.0",
+    python_requires = ">=3.10",
+    requires = ["antlr4-python3-runtime>=4.13.2", "protobuf>=6.30.2", "google-re2>=1.1.20240702", "googleapis-common-protos>=1.70.0"],
+    extra_requires = {
+        "dev": ["mypy-protobuf>=3.6.0", "pytest>=8.3.5"],
+    },
+    description_file = "//:README.md",
+    description_content_type = "text/markdown",
+    extra_distinfo_files = {
+        "//:LICENSE": "LICENSE",
+    },
+    deps = [
+        ":mimicel_pkg",
+    ],
+)
+
+pkg_tar(
+    name = "mimicel_src_tar",
+    srcs = [
+        ":mimicel_pkg",
+    ],
+    package_dir = "mimicel"
+)

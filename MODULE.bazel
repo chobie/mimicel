@@ -1,0 +1,33 @@
+module(name = "mimicel", version = "0.1")
+bazel_dep(name = "rules_python", version = "1.4.1")
+bazel_dep(name = "cel-spec")
+bazel_dep(name = "protobuf", version = "30.2")
+bazel_dep(name = "antlr4_tool", version = "4.13.2")
+bazel_dep(name = "rules_pkg", version = "1.1.0")
+
+local_path_override(
+    module_name = "antlr4_tool",
+    path = "third_party/antlr4",
+)
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    python_version = "3.10",
+)
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "pypi",
+    python_version = "3.10",
+    requirements_lock = ":requirements.txt",
+)
+
+use_repo(pip, "pypi")
+
+git_override(
+    module_name = "cel-spec",
+    remote = "https://github.com/google/cel-spec.git",
+    commit = "9f069b3ee58b02d6f6736c5ebd6587075c1a1b22",
+    patches = ["//patches:cel_spec_pyproto.patch"],
+    patch_args = ["-p1"],
+)

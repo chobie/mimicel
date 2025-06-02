@@ -1,0 +1,12 @@
+java_binary(
+    name = "antlr4",
+    runtime_deps = [":antlr_jar"],
+    main_class = "org.antlr.v4.Tool",
+    visibility = ["//visibility:public"],
+)
+
+java_import(
+    name = "antlr_jar",
+    jars = ["antlr-4.13.2-complete.jar"],
+    visibility = ["//visibility:public"],
+)

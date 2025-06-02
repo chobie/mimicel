@@ -1,0 +1,52 @@
+name: Bazel Python Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  bazel-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Install Bazel
+        uses: bazelbuild/setup-bazelisk@v3
+        with:
+          bazelisk-version: v1.26.0
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip curl unzip
+
+      - name: Cache Bazel output
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/bazel
+            ~/.bazelcache
+          key: ${{ runner.os }}-bazel-${{ hashFiles('**/BUILD', '**/WORKSPACE', '**/*.bzl') }}
+
+      - name: Download ANTLR jar
+        run: |
+          curl -o third_party/antlr4/antlr-4.13.2-complete.jar https://www.antlr.org/download/antlr-4.13.2-complete.jar
+
+      - name: Run Bazel Python test
+        run: |
+          bazel run //conformance:run_basic_test
