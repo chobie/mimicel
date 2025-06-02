@@ -1,0 +1,38 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+.*
+
+*.jar
+
+# Virtual environments
+.venv
+.idea
+
+.DS_Store
+
+*.tokens
+*.interp
+
+# bazel
+bazel-bin
+bazel-out
+bazel-testlogs
+bazel-*
+
+# generated
+cel
+google
+
+# repository
+cel-spec
+googleapis
+
+# misc
+tmp
+dist
