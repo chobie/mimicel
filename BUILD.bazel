@@ -33,7 +33,7 @@ py_package(
 py_wheel(
     name = "mimicel_wheel",
     distribution = "mimicel",
-    version = "0.0.1.dev4",
+    version = "0.0.1",
     python_tag = "py3",
     platform = "any",
     homepage = "https://github.com/chobie/mimicel",
