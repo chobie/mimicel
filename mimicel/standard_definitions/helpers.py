@@ -1,5 +1,5 @@
 # standard_definitions/helpers.py
-import re
+import re2
 from datetime import datetime, timedelta, timezone, tzinfo
 from typing import Optional
 
@@ -50,7 +50,7 @@ def _parse_string_to_uint(s_val: str, op_name: str) -> int:
 
 
 def _parse_fixed_offset_tz(tz_str: str) -> Optional[timezone]:
-    match = re.fullmatch(r"([+-])(\d{2}):(\d{2})", tz_str)
+    match = re2.fullmatch(r"([+-])(\d{2}):(\d{2})", tz_str)
     if match:
         sign, hh, mm = match.groups()
         hours = int(hh)
