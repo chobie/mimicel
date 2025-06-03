@@ -99,6 +99,10 @@ def new_env(*args):
                 registry.register_message_type(message_class)
 
             if isinstance(arg, Variable):
+                # Check if variable name is a reserved word
+                if arg.name in _reserved_words:
+                    raise ValueError(f"'{arg.name}' is a reserved word and cannot be used as a variable name")
+                
                 if isinstance(arg.type, CelType):
                     if isinstance(arg.type, ObjectType):
                         #print("# ", arg.name, arg.type)
@@ -113,6 +117,10 @@ def new_env(*args):
                         pass
 
             if isinstance(arg, Function):
+                # Check if function name is a reserved word
+                if arg.name in _reserved_words:
+                    raise ValueError(f"'{arg.name}' is a reserved word and cannot be used as a function name")
+                
                 functions.register(CelFunctionDefinition(name=arg.name,
                                                             arg_types=arg.overload.args,
                                                             result_type=arg.overload.result,

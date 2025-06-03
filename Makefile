@@ -18,4 +18,4 @@ simple:
 
 .PHONY: test
 test:
-	bazel test //tests/legacy:all
+	bazel test //tests/legacy:all //tests:test_reserved_words

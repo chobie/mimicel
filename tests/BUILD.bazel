@@ -1,0 +1,16 @@
+load("@rules_python//python:defs.bzl", "py_test")
+
+package(default_visibility = ["//visibility:public"])
+
+py_test(
+    name = "test_reserved_words",
+    srcs = ["test_reserved_words.py"],
+    deps = [
+        "//mimicel:core",
+        "@pypi//pytest",
+        "@pypi//protobuf",
+        "@pypi//google_re2",
+        "@pypi//antlr4_python3_runtime",
+        "@cel-spec//proto/cel/expr:cel_expr_py_proto",
+    ],
+)
