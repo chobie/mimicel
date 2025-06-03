@@ -36,3 +36,5 @@ googleapis
 # misc
 tmp
 dist
+docs
+IMPROVEMENT_PROPOSALS.md
