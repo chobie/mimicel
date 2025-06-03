@@ -25,6 +25,7 @@ py_binary(
         "@pypi//antlr4_python3_runtime",
         "@pypi//google_re2",
         "@pypi//protobuf",
+        "@pypi_examples//typing_extensions",
         "//mimicel:core",
         "@cel-spec//proto/cel/expr:cel_expr_py_proto",
     ],

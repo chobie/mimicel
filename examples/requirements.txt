@@ -1,0 +1,2 @@
+# Requirements for examples only
+typing-extensions>=4.5.0

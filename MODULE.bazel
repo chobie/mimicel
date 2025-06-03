@@ -21,8 +21,13 @@ pip.parse(
     python_version = "3.10",
     requirements_lock = ":requirements.txt",
 )
+pip.parse(
+    hub_name = "pypi_examples",
+    python_version = "3.10",
+    requirements_lock = "//examples:requirements.txt",
+)
 
-use_repo(pip, "pypi")
+use_repo(pip, "pypi", "pypi_examples")
 
 git_override(
     module_name = "cel-spec",
