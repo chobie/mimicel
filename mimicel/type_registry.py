@@ -1,6 +1,6 @@
 # type_registry.py
+import logging
 from typing import Dict, Set, Type, Optional, Any, TYPE_CHECKING
-
 from google.protobuf.message import Message as ProtobufMessage
 from google.protobuf.descriptor import FieldDescriptor, EnumDescriptor, Descriptor
 
@@ -13,6 +13,10 @@ from .cel_values.cel_types import (
     CEL_FLOAT_WRAPPER, CEL_ANY
 )
 
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 class TypeRegistry:
     def __init__(self):
         # message_name (str) -> {field_name (str): CelType}
@@ -20,7 +24,6 @@ class TypeRegistry:
         # message_name (str) -> Python Protobuf Message Class (Type[ProtobufMessage])
         self._message_python_classes: Dict[str, Type[ProtobufMessage]] = {}
         self._message_constructibility: Dict[str, bool] = {}
-        # ★ Enum関連の情報を保持する辞書を追加
         #   enum_name (str) -> {value_name (str): value_number (int)}
         self._enum_values: Dict[str, Dict[str, int]] = {}
         #   enum_name (str) -> EnumDescriptor (オプション、詳細情報が必要な場合)
@@ -169,7 +172,7 @@ class TypeRegistry:
             #     except Exception: pass # クラス取得失敗は無視
             return
         elif message_name in self._message_python_classes:
-            print(
+            logger.warn(
                 f"Warning: Message type '{message_name}' is being re-registered with a different class. This may be unintended.")
 
         self._message_python_classes[message_name] = message_class

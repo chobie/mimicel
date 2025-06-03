@@ -1,5 +1,5 @@
 # api.py
-
+import logging
 from typing import Dict, Any, Optional, Union, Callable, List
 
 from antlr4 import InputStream, CommonTokenStream
@@ -36,6 +36,9 @@ from google.protobuf.wrappers_pb2 import Int32Value, UInt32Value, Int64Value, UI
 from google.protobuf.duration_pb2 import Duration as ProtobufDuration
 from google.protobuf.timestamp_pb2 import Timestamp as ProtobufTimestamp
 from google.protobuf.any_pb2 import Any as PbAny
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class CELCompileError(Exception):
@@ -138,7 +141,7 @@ class CelEnv:
             self.type_registry.register_message_type(ProtobufTimestamp, is_constructible=False)
 
         except Exception as e:
-            print(f"Warning: Failed to auto-register standard WKTs: {e}")
+            logger.warning(f"Warning: Failed to auto-register standard WKTs: {e}")
 
         if proto_modules:
             # 必要なインポート (重複を避けるため、既存のインポートと合わせて調整してください)
@@ -235,14 +238,14 @@ class CelEnv:
         if STANDARD_LIBRARY:
             STANDARD_LIBRARY.register_functions_to(self.builtins)
         else:
-            print("Warning: STANDARD_LIBRARY not found or initialized. Standard functions may be missing.")
+            logger.warning("Warning: STANDARD_LIBRARY not found or initialized. Standard functions may be missing.")
 
         if additional_libraries:
             for lib in additional_libraries:
                 if isinstance(lib, CelLibrary):
                     lib.register_functions_to(self.builtins)
                 else:
-                    print(f"Warning: Ignoring an item in 'additional_libraries' "
+                    logger.warning(f"Warning: Ignoring an item in 'additional_libraries' "
                           f"that is not a CelLibrary instance: {type(lib)}")
 
         if isinstance(builtins, CelFunctionRegistry):
@@ -257,7 +260,7 @@ class CelEnv:
                         CelFunctionDefinition(func_name, [CEL_DYN], CEL_DYN, func_impl)
                     )
                 else:
-                    print(f"Warning: Item '{func_name}' in 'builtins' dict is not callable and will be ignored.")
+                    logger.warning(f"Warning: Item '{func_name}' in 'builtins' dict is not callable and will be ignored.")
         elif builtins is not None:
             raise TypeError(
                 f"Invalid type for 'builtins'. Expected Dict, CelFunctionRegistry, or None. Got: {type(builtins)}")

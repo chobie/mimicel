@@ -1,6 +1,6 @@
 # cel_checker.py
 # CELの型チェック関連のロジックを格納するモジュール
-
+import logging
 from typing import Dict, Any, Optional, List, TYPE_CHECKING
 
 from google.protobuf.descriptor import FieldDescriptor, Descriptor
@@ -21,6 +21,10 @@ from .cel_values.cel_types import (
 
 if TYPE_CHECKING:
     from .api import CelEnv  # 型ヒントのための循環参照回避
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 # --- checked_pb2.Type 定数 ---
 TYPE_INT64_PB = checked_pb2.Type(primitive=checked_pb2.Type.PrimitiveType.INT64)
@@ -91,7 +95,7 @@ class CelChecker:
             self.env.type_registry.get_message_descriptor(message_cel_type.name)  # 仮のメソッド名
 
         if not message_descriptor:
-            print(f"DEBUG: No descriptor found for message type {message_cel_type.name}")
+            logger.debug(f"DEBUG: No descriptor found for message type {message_cel_type.name}")
             return None
 
         extension_field_descriptor: Optional[FieldDescriptor] = None
@@ -102,10 +106,10 @@ class CelChecker:
             if ext_desc and ext_desc.containing_type == message_descriptor:
                 extension_field_descriptor = ext_desc
         except KeyError:
-            print(f"DEBUG: Extension '{extension_fqn}' not found in descriptor pool.")
+            logger.debug(f"DEBUG: Extension '{extension_fqn}' not found in descriptor pool.")
             return None  # 拡張が見つからない
         except Exception as e:
-            print(f"DEBUG: Error during FindExtensionByName for '{extension_fqn}': {e}")
+            logger.debug(f"DEBUG: Error during FindExtensionByName for '{extension_fqn}': {e}")
             return None  # その他のエラー
 
         if extension_field_descriptor:

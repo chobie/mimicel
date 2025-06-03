@@ -1,4 +1,5 @@
 # context.py
+import logging
 from typing import Callable, Union, Any, List, Optional, Dict, TYPE_CHECKING
 
 from cel.expr import checked_pb2
@@ -12,6 +13,9 @@ from .cel_library import CelLibrary
 
 if TYPE_CHECKING:
     from .api import CelEnv
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class EvalContext:
@@ -70,7 +74,7 @@ class EvalContext:
                         ))
                     except Exception as e:
                         # ここでのエラーは警告に留めるか、より厳格に処理するか
-                        print(f"Warning: Could not auto-register callable '{name}' from scope: {e}")
+                        logger.warn(f"Warning: Could not auto-register callable '{name}' from scope: {e}")
 
     def get(self, name: str, arg_types_str_list: Optional[List[str]] = None) -> Any:
         # デバッグ用: どの名前とコンテナで呼ばれているか確認

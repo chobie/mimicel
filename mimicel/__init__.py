@@ -1,4 +1,5 @@
 import inspect
+import logging
 from abc import ABC
 from typing import Optional, Dict, Union, Callable, Any, List, get_type_hints, get_args, get_origin
 
@@ -12,6 +13,10 @@ from .cel_values import CelType, CelValue
 from .cel_values.cel_types import CelFunctionRegistry, CEL_STRING, CEL_INT, CEL_DOUBLE, CEL_BYTES, CEL_UINT, CEL_BOOL, \
     CEL_FLOAT, CEL_MAP, CEL_LIST, CelFunctionDefinition, CEL_ERROR, CEL_DYN
 from .type_registry import TypeRegistry
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
 
 # このファイルの実装は人の手で管理されています。
 # 基本的にここらへんの機能を使っていれば大きなBreaking Changesには遭遇しないと思います。
@@ -47,7 +52,6 @@ class CelProgramWrapper:
         try:
             result = self.program.eval(context)
         except Exception as e:
-            print(e)
             issue = CelIssue(e)
 
         return result, detail, issue
@@ -74,7 +78,6 @@ class CelEnvWrapper:
         try:
             program = CelProgramWrapper(CelProgram(ast.checked, self.env))
         except Exception as e:
-            print(e)
             issue = CelIssue(e)
 
         return program, issue
@@ -91,8 +94,6 @@ def new_env(*args):
 
         for arg in args:
             if isinstance(arg, Types):
-                # print("# register", arg.descriptor)
-                # print(arg.descriptor.full_name)
                 descriptor: Descriptor = arg.descriptor
                 types[arg.descriptor.full_name] = descriptor
                 message_class = message_factory.GetMessageClass(descriptor)
@@ -105,19 +106,15 @@ def new_env(*args):
                 
                 if isinstance(arg.type, CelType):
                     if isinstance(arg.type, ObjectType):
-                        #print("# ", arg.name, arg.type)
                         if types.get(arg.type.name):
-                            #print("CelType: ", arg.type.name)
                             variables[arg.name] = arg.type.name
                         else:
-                            #print("Not found", arg.name)
                             pass
                     else:
                         variables[arg.name] = arg.type.name
                         pass
 
             if isinstance(arg, Function):
-                # Check if function name is a reserved word
                 if arg.name in _reserved_words:
                     raise ValueError(f"'{arg.name}' is a reserved word and cannot be used as a function name")
                 
