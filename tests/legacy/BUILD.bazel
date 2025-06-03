@@ -1,0 +1,124 @@
+load("@rules_python//python:defs.bzl", "py_test", "py_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# Use pre-generated proto files
+py_library(
+    name = "test_messages_py_pb2",
+    srcs = [
+        "test_messages_pb2.py",
+    ],
+    deps = [
+        "@pypi//protobuf",
+    ],
+)
+
+# Test files
+py_test(
+    name = "test_duration",
+    srcs = ["test_duration.py"],
+    deps = [
+        "//mimicel:core",
+        "//mimicel/duration:duration",
+        "@pypi//pytest",
+        "@pypi//protobuf",
+        "@pypi//google_re2",
+        "@pypi//antlr4_python3_runtime",
+        "@cel-spec//proto/cel/expr:cel_expr_py_proto",
+    ],
+)
+
+py_test(
+    name = "test_eval_expr",
+    srcs = ["test_eval_expr.py"],
+    deps = [
+        "//mimicel:core",
+        "//mimicel:cel_antlr_generated_py",
+        "@pypi//pytest",
+        "@pypi//antlr4_python3_runtime",
+        "@pypi//protobuf",
+        "@pypi//google_re2",
+        "@cel-spec//proto/cel/expr:cel_expr_py_proto",
+    ],
+)
+
+py_test(
+    name = "test_joda",
+    srcs = ["test_joda.py"],
+    deps = [
+        "//mimicel:core",
+        "//mimicel/joda:joda",
+        "@pypi//pytest",
+        "@pypi//protobuf",
+        "@pypi//google_re2",
+        "@pypi//antlr4_python3_runtime",
+        "@cel-spec//proto/cel/expr:cel_expr_py_proto",
+    ],
+)
+
+py_test(
+    name = "test_protobuf_integration",
+    srcs = ["test_protobuf_integration.py"],
+    deps = [
+        ":test_messages_py_pb2",
+        "//mimicel:core",
+        "@pypi//pytest",
+        "@pypi//protobuf",
+        "@pypi//google_re2",
+        "@pypi//antlr4_python3_runtime",
+        "@cel-spec//proto/cel/expr:cel_expr_py_proto",
+    ],
+)
+
+py_test(
+    name = "test_type_registry",
+    srcs = ["test_type_registry.py"],
+    deps = [
+        "//mimicel:core",
+        "@pypi//pytest",
+        "@pypi//protobuf",
+        "@pypi//google_re2",
+        "@pypi//antlr4_python3_runtime",
+        "@cel-spec//proto/cel/expr:cel_expr_py_proto",
+    ],
+)
+
+py_test(
+    name = "test_wkt",
+    srcs = ["test_wkt.py"],
+    deps = [
+        "//mimicel:core",
+        "@pypi//pytest",
+        "@pypi//protobuf",
+        "@pypi//google_re2",
+        "@pypi//antlr4_python3_runtime",
+        "@cel-spec//proto/cel/expr:cel_expr_py_proto",
+    ],
+)
+
+py_test(
+    name = "test_wkt_value_extended",
+    srcs = ["test_wkt_value_extended.py"],
+    deps = [
+        "//mimicel:core",
+        "@pypi//pytest",
+        "@pypi//protobuf",
+        "@pypi//google_re2",
+        "@pypi//antlr4_python3_runtime",
+        "@cel-spec//proto/cel/expr:cel_expr_py_proto",
+    ],
+)
+
+# Test suite to run all tests
+test_suite(
+    name = "all",
+    tests = [
+        ":test_duration",
+        ":test_eval_expr",
+        ":test_joda",
+        ":test_protobuf_integration",
+        ":test_type_registry",
+        ":test_wkt",
+        ":test_wkt_value_extended",
+    ],
+)

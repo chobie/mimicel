@@ -1,0 +1,19 @@
+# Development dependencies including test requirements
+# This file includes all dependencies from pyproject.toml plus dev dependencies
+
+# Main dependencies
+antlr4-python3-runtime==4.13.2
+google-re2==1.1.20240702
+googleapis-common-protos==1.70.0
+protobuf==6.31.0
+
+# Dev dependencies
+mypy-protobuf==3.6.0
+pytest==8.3.5
+
+# pytest dependencies (transitive)
+iniconfig==2.0.0
+packaging==24.2
+pluggy==1.5.0
+tomli==2.2.1
+exceptiongroup==1.2.2

@@ -15,3 +15,7 @@ conformance:
 .PHONY: simple
 simple:
 	bazel run //examples:simple
+
+.PHONY: test
+test:
+	bazel test //tests/legacy:all
