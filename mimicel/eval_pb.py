@@ -23,7 +23,17 @@ from .cel_values.cel_types import CelType, CEL_DYN, CEL_INT, CEL_BOOL, CEL_UNKNO
     CEL_VALUE_WRAPPER, CEL_ANY, CEL_STRING, CelDynValue
 
 from google.protobuf.message import Message as ProtobufMessage, DecodeError
-from google._upb._message import RepeatedScalarContainer, RepeatedCompositeContainer
+
+try:
+    from google._upb._message import RepeatedScalarContainer, RepeatedCompositeContainer
+except ImportError:
+    class RepeatedScalarContainer:
+        """Fallback class when google._upb._message.RepeatedScalarContainer is not available."""
+        pass
+
+    class RepeatedCompositeContainer:
+        """Fallback class when google._upb._message.RepeatedCompositeContainer is not available."""
+        pass
 
 _WRAPPER_TYPE_FULL_NAMES = {
     "google.protobuf.BoolValue", "google.protobuf.BytesValue",

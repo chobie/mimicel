@@ -22,10 +22,9 @@ py_proto_library(
 py_binary(
     name = "simple",
     srcs = [
-        "bazel_protobuf_wrapper.py",
         "simple.py",
     ],
-    main = "bazel_protobuf_wrapper.py",
+    main = "simple.py",
     deps = [
         ":user_py_proto",
         "@pypi//antlr4_python3_runtime",
