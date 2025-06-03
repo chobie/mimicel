@@ -137,7 +137,13 @@ def new_env(*args):
 
 class ObjectType(CelType):
     def __init__(self, name: str):
-        self.name = name
+        # Generate a unique ID for this type instance
+        type_id = CelType._generate_id()
+        # Call parent's __init__ with name and id
+        super().__init__(name, type_id)
+        # Note: We don't register ObjectType instances in the CelType registry
+        # because they are placeholders that will be replaced by actual
+        # CelMessageType instances when the message types are registered
 
 class NativeTypes:
     def __init__(self, type: Any):
