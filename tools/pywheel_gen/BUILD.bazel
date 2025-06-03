@@ -1,0 +1,21 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+py_binary(
+    name = "pywheel_gen",
+    srcs = ["pywheel_gen.py"],
+    python_version = "PY3",
+    deps = [
+        "@pypi//tomli",  # For Python 3.10 compatibility
+    ],
+)
+
+# Convenience target to generate wheel BUILD content from root pyproject.toml
+genrule(
+    name = "generate_wheel_build",
+    srcs = ["//:pyproject.toml"],
+    outs = ["wheel_build_content.txt"],
+    cmd = "$(location :pywheel_gen) $(location //:pyproject.toml) > $@",
+    tools = [":pywheel_gen"],
+)

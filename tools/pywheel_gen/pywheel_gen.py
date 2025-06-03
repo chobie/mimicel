@@ -1,12 +1,36 @@
-import tomllib  # Python 3.11+
+try:
+    # Python 3.11+
+    import tomllib
+except ImportError:
+    # Python 3.10 and earlier - use tomli backport
+    import tomli as tomllib
+
 from pathlib import Path
 import sys
+import os
 
 def main():
-    pyproject = Path("pyproject.toml")
-    if not pyproject.exists():
-        print("pyproject.toml not found", file=sys.stderr)
-        sys.exit(1)
+    # Check for command line argument or use default paths
+    if len(sys.argv) > 1:
+        pyproject = Path(sys.argv[1])
+    else:
+        # Try common locations
+        possible_paths = [
+            Path("pyproject.toml"),
+            Path(os.environ.get("BUILD_WORKSPACE_DIRECTORY", ".")) / "pyproject.toml",
+            Path(__file__).parent.parent.parent / "pyproject.toml",  # From tools/pywheel_gen to root
+        ]
+        
+        pyproject = None
+        for path in possible_paths:
+            if path.exists():
+                pyproject = path
+                break
+        
+        if not pyproject:
+            print("pyproject.toml not found. Please provide path as argument.", file=sys.stderr)
+            print("Usage: pywheel_gen [path/to/pyproject.toml]", file=sys.stderr)
+            sys.exit(1)
 
     with open(pyproject, "rb") as f:
         data = tomllib.load(f)
