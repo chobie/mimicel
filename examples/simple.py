@@ -1,10 +1,18 @@
 import mimicel as cel
-from user_pb2 import User
+
+try:
+    from user_pb2 import User
+except ImportError:
+    try:
+        from examples.user_pb2 import User
+    except ImportError:
+        from example.user_pb2 import User
 
 def hello_str_str(arg: str) -> str:
     return "Hello " + arg
 
-if __name__ == '__main__':
+def main():
+    """Main function that can be called from wrapper or __main__."""
     user = User(
         name="Shuhei Tanuma",
         age=10
@@ -38,3 +46,7 @@ if __name__ == '__main__':
         'user': user
     })
     print(out)
+
+
+if __name__ == '__main__':
+    main()

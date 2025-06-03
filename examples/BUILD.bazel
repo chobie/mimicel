@@ -1,15 +1,33 @@
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("@rules_python//python:packaging.bzl", "py_wheel", "py_package")
+load("@rules_python//python:defs.bzl", "py_library")
+load("@protobuf//bazel:proto_library.bzl", "proto_library")
+load("@protobuf//bazel:py_proto_library.bzl", "py_proto_library")
 
 
 package(default_visibility = ["//visibility:public"])
 licenses(["notice"])  # Apache 2.0
 exports_files(["LICENSE"])
 
+proto_library(
+    name = "user_proto",
+    srcs = ["user.proto"],
+)
+
+py_proto_library(
+    name = "user_py_proto",
+    deps = [":user_proto"],
+)
+
 py_binary(
     name = "simple",
-    srcs = ["simple.py"],
+    srcs = [
+        "bazel_protobuf_wrapper.py",
+        "simple.py",
+    ],
+    main = "bazel_protobuf_wrapper.py",
     deps = [
+        ":user_py_proto",
         "@pypi//antlr4_python3_runtime",
         "@pypi//google_re2",
         "@pypi//protobuf",
@@ -17,6 +35,7 @@ py_binary(
         "@cel-spec//proto/cel/expr:cel_expr_py_proto",
     ],
 )
+
 
 py_binary(
     name = "like-a-pydantic",
