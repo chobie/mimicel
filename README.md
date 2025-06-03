@@ -69,24 +69,51 @@ Currently, the focus is on improving design consistency, as well as enhancing th
 
 ## Setup
 
-uv package manager
+⚠️ **Important**: The installation of mimicel requires additional steps beyond `pip install`. The library depends on Protocol Buffer definitions that must be generated separately.
 
-```
-uv add mimicel
-```
+### Prerequisites
 
-pip
-```
+Before installing mimicel, ensure you have:
+- Python 3.8 or later
+- protoc (Protocol Buffer compiler) - Install via `pip install grpcio-tools` or from [protobuf releases](https://github.com/protocolbuffers/protobuf/releases)
+
+### Installation Steps
+
+#### Step 1: Install mimicel
+
+Using pip:
+```bash
 pip install mimicel
 ```
 
-This alone is not enough to use the library.
-Please make sure to read the following section as well.
+Using uv package manager:
+```bash
+uv add mimicel
+```
 
-### Important: You must generate Python files from proto definitions.
+#### Step 2: Generate required Protocol Buffer files
 
-This library depends on `cel` and `googleapis` proto definitions.
-It is critically important that users generate the required files themselves and make them importable in their own project structure.
+**This step is mandatory!** Mimicel depends on CEL protocol buffer definitions that are not included in the package and must be generated manually.
+
+##### Option A: Using the provided setup script (Recommended)
+
+A convenience script is provided in the mimicel repository. Copy and run it in your project directory:
+
+```bash
+# If you cloned the mimicel repo:
+cp path/to/mimicel/setup_cel_protos.sh ./
+chmod +x setup_cel_protos.sh
+./setup_cel_protos.sh
+
+# Or download directly:
+curl -O https://raw.githubusercontent.com/chobie/mimicel/main/setup_cel_protos.sh
+chmod +x setup_cel_protos.sh
+./setup_cel_protos.sh
+```
+
+##### Option B: Manual generation
+
+If you prefer to generate the files manually:
 
 If you’re using Bazel, you can use the following command to make use of the proto files generated from `cel-spec`.
 
@@ -122,6 +149,44 @@ protoc -I=./cel-spec/proto -I=./googleapis/ \
 
 As of now, cel-spec does not provide pre-generated Protocol Buffers artifacts for Python. For googleapis, you can use the googleapis-common-protos package.
 Currently, you need to generate the Protocol Buffers artifacts from cel-spec yourself.
+
+### Verifying Installation
+
+After completing the setup, test your installation with this simple script:
+
+```python
+import mimicel as cel
+
+# Create a simple environment
+env, err = cel.new_env()
+if err is not None:
+    print(f"Failed to create environment: {err}")
+else:
+    print("Success! Mimicel is properly installed.")
+    
+    # Test a simple expression
+    ast, issue = env.compile("1 + 1")
+    if issue is None:
+        program, _ = env.program(ast)
+        result, _, _ = program.eval({})
+        print(f"1 + 1 = {result}")
+```
+
+### Troubleshooting
+
+#### Error: `ModuleNotFoundError: No module named 'cel'`
+
+This is the most common error and indicates that the CEL protocol buffer files haven't been generated. Make sure you've completed Step 2 of the installation process.
+
+#### Error: `protoc-gen-mypy: program not found`
+
+If you encounter this error when using the manual generation method with `--mypy_out`, you can either:
+1. Install mypy-protobuf: `pip install mypy-protobuf`
+2. Or simply omit the `--mypy_out` flag from the protoc command
+
+#### Generated files in wrong location
+
+Ensure the proto files are generated in your project's Python path. The generated `cel` directory should be at the same level as your Python scripts or in a location that's in your `PYTHONPATH`.
 
 ## Examples
 
