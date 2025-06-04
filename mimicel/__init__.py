@@ -98,8 +98,7 @@ def new_env(*args):
                 types[arg.descriptor.full_name] = descriptor
                 message_class = message_factory.GetMessageClass(descriptor)
                 registry.register_message_type(message_class)
-
-            if isinstance(arg, Variable):
+            elif isinstance(arg, Variable):
                 # Check if variable name is a reserved word
                 if arg.name in _reserved_words:
                     raise ValueError(f"'{arg.name}' is a reserved word and cannot be used as a variable name")
@@ -113,8 +112,7 @@ def new_env(*args):
                     else:
                         variables[arg.name] = arg.type.name
                         pass
-
-            if isinstance(arg, Function):
+            elif isinstance(arg, Function):
                 if arg.name in _reserved_words:
                     raise ValueError(f"'{arg.name}' is a reserved word and cannot be used as a function name")
                 
@@ -124,6 +122,8 @@ def new_env(*args):
                                                             implementation=arg.overload.get_binding(),
                                                             is_method=False,
                                                             expects_cel_values=False))
+            else:
+                raise TypeError(f"'{arg}' is not a function or variable")
 
         env = CelEnvWrapper(CelEnv(
             variables=variables,
