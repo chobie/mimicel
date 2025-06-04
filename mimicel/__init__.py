@@ -243,6 +243,32 @@ class BinaryBinding(Binding):
     def __init__(self, op: BinaryOp):
         self.op = op
 
+        # 型ヒントを取得
+        type_hints = get_type_hints(op)
+        sig = inspect.signature(op)
+
+        # 引数の個数チェック
+        if len(sig.parameters) != 2:
+            raise TypeError("Binary function must take exactly two arguments")
+
+        # 引数と返り値の型を取得
+        param_names = list(sig.parameters.keys())
+        if len(param_names) >= 2:
+            arg1_type = type_hints.get(param_names[0])
+            arg2_type = type_hints.get(param_names[1])
+        else:
+            arg1_type = None
+            arg2_type = None
+        return_type = type_hints.get('return')
+
+        # 型チェック（必要に応じて実装）
+        # ここでは型チェックをコメントアウトし、任意の型を許可
+        # if arg1_type is not str or arg2_type is not str or return_type is not str:
+        #     raise TypeError(f"Binary function must be of type (str, str) -> str, got ({arg1_type}, {arg2_type}) -> {return_type}")
+
+        if not self._is_valid_return_type(return_type):
+            raise TypeError(f"Return type {return_type} is not an allowed CEL type")
+
 ALLOWED_RETURN_TYPES = (
     int, float, bool, str, bytes, list, dict, type(None)
 )
