@@ -115,13 +115,25 @@ def new_env(*args):
             elif isinstance(arg, Function):
                 if arg.name in _reserved_words:
                     raise ValueError(f"'{arg.name}' is a reserved word and cannot be used as a function name")
-                
-                functions.register(CelFunctionDefinition(name=arg.name,
-                                                            arg_types=arg.overload.args,
-                                                            result_type=arg.overload.result,
-                                                            implementation=arg.overload.get_binding(),
-                                                            is_method=False,
-                                                            expects_cel_values=False))
+
+                if isinstance(arg.overload, Overload):
+                    functions.register(CelFunctionDefinition(name=arg.name,
+                                                                arg_types=arg.overload.args,
+                                                                result_type=arg.overload.result,
+                                                                implementation=arg.overload.get_binding(),
+                                                                is_method=False,
+                                                                expects_cel_values=False))
+                elif isinstance(arg.overload, MemberOverload):
+                    functions.register(CelFunctionDefinition(name=arg.name,
+                                                                arg_types=arg.overload.args,
+                                                                result_type=arg.overload.result,
+                                                                implementation=arg.overload.get_binding(),
+                                                                is_method=True,
+                                                                receiver_type=arg.overload.receiver,
+                                                                expects_cel_values=False))
+                else:
+                    raise ValueError(f"'{arg.name}' is a reserved word and cannot be used as a function name")
+
             else:
                 raise TypeError(f"'{arg}' is not a function or variable")
 
@@ -277,6 +289,10 @@ class MemberOverload:
         self.args = args
         self.result = result
         self.impl = impl
+
+    def get_binding(self):
+        return self.impl.op
+
 
 class Function:
     def __init__(self, name: str, overload: Overload):
