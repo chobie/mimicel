@@ -19,6 +19,17 @@ wheels/
 *.tokens
 *.interp
 
+# ANTLR generated Python files
+mimicel/CELLexer.py
+mimicel/CELParser.py
+mimicel/CELVisitor.py
+mimicel/duration/CelDurationLexer.py
+mimicel/duration/CelDurationParser.py
+mimicel/duration/CelDurationVisitor.py
+mimicel/joda/JodaLexer.py
+mimicel/joda/JodaParser.py
+mimicel/joda/JodaVisitor.py
+
 # bazel
 bazel-bin
 bazel-out
