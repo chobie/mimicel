@@ -276,7 +276,14 @@ ALLOWED_RETURN_TYPES += (Message, CelType, CEL_ERROR)
 
 class FunctionBinding(Binding):
     def __init__(self, op: FunctionOp):
-        self.op = op
+        # Store the original function that expects List[Any]
+        self._original_op = op
+        
+        # Create a wrapper that converts *args to List[Any]
+        def wrapper(*args):
+            return op(list(args))
+        
+        self.op = wrapper
 
         # 型ヒントを取得
         type_hints = get_type_hints(op)
@@ -284,15 +291,19 @@ class FunctionBinding(Binding):
 
         # 引数の個数チェック
         if len(sig.parameters) != 1:
-            raise TypeError("Unary function must take exactly one argument")
+            raise TypeError("Function must take exactly one argument (List[Any])")
 
         # 引数と返り値の型を取得
         param_name = next(iter(sig.parameters))
         arg_type = type_hints.get(param_name)
         return_type = type_hints.get('return')
 
-        if arg_type is not str or return_type is not str:
-            raise TypeError(f"Unary function must be of type (str) -> str, got ({arg_type}) -> {return_type}")
+        # Check if the argument type is List[Any] or compatible
+        if hasattr(arg_type, '__origin__') and arg_type.__origin__ is list:
+            # This is a List type, which is what we expect for FunctionOp
+            pass
+        else:
+            raise TypeError(f"Function must take List[Any] as argument, got {arg_type}")
 
         if not self._is_valid_return_type(return_type):
             raise TypeError(f"Return type {return_type} is not an allowed CEL type")

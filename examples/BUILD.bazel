@@ -95,3 +95,19 @@ py_binary(
         "@cel-spec//proto/cel/expr:cel_expr_py_proto",
     ],
 )
+
+py_binary(
+    name = "functions",
+    srcs = [
+        "functions.py",
+    ],
+    main = "functions.py",
+    deps = [
+        ":user_py_proto",
+        "@pypi//antlr4_python3_runtime",
+        "@pypi//google_re2",
+        "@pypi//protobuf",
+        "//mimicel:core",
+        "@cel-spec//proto/cel/expr:cel_expr_py_proto",
+    ],
+)
