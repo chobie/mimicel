@@ -83,6 +83,61 @@ class CelEnvWrapper:
         return program, issue
 
 
+def _process_env_arg(arg, types, variables, functions, registry):
+    """Process a single argument for new_env."""
+    if isinstance(arg, Types):
+        descriptor: Descriptor = arg.descriptor
+        types[arg.descriptor.full_name] = descriptor
+        message_class = message_factory.GetMessageClass(descriptor)
+        registry.register_message_type(message_class)
+    elif isinstance(arg, NativeTypes):
+        # Register native Python type using reflection
+        native_type = arg.type
+        type_name = native_type.__name__
+        
+        # Register the native type in the registry
+        registry.register_native_type(native_type)
+        types[type_name] = native_type
+    elif isinstance(arg, Variable):
+        # Check if variable name is a reserved word
+        if arg.name in _reserved_words:
+            raise ValueError(f"'{arg.name}' is a reserved word and cannot be used as a variable name")
+        
+        if isinstance(arg.type, CelType):
+            if isinstance(arg.type, ObjectType):
+                if types.get(arg.type.name):
+                    variables[arg.name] = arg.type.name
+                else:
+                    pass
+            else:
+                variables[arg.name] = arg.type.name
+                pass
+    elif isinstance(arg, Function):
+        if arg.name in _reserved_words:
+            raise ValueError(f"'{arg.name}' is a reserved word and cannot be used as a function name")
+
+        if isinstance(arg.overload, Overload):
+            functions.register(CelFunctionDefinition(name=arg.name,
+                                                        arg_types=arg.overload.args,
+                                                        result_type=arg.overload.result,
+                                                        implementation=arg.overload.get_binding(),
+                                                        is_method=False,
+                                                        expects_cel_values=False))
+        elif isinstance(arg.overload, MemberOverload):
+            functions.register(CelFunctionDefinition(name=arg.name,
+                                                        arg_types=arg.overload.args,
+                                                        result_type=arg.overload.result,
+                                                        implementation=arg.overload.get_binding(),
+                                                        is_method=True,
+                                                        receiver_type=arg.overload.receiver,
+                                                        expects_cel_values=False))
+        else:
+            raise ValueError(f"'{arg.name}' is a reserved word and cannot be used as a function name")
+
+    else:
+        raise TypeError(f"'{arg}' is not a function or variable")
+
+
 def new_env(*args):
     env = None
     issue = None
@@ -92,50 +147,16 @@ def new_env(*args):
         functions = CelFunctionRegistry()
         registry = TypeRegistry()
 
+        # Process args in two passes:
+        # 1. First pass: Process Types and NativeTypes to register all types
         for arg in args:
-            if isinstance(arg, Types):
-                descriptor: Descriptor = arg.descriptor
-                types[arg.descriptor.full_name] = descriptor
-                message_class = message_factory.GetMessageClass(descriptor)
-                registry.register_message_type(message_class)
-            elif isinstance(arg, Variable):
-                # Check if variable name is a reserved word
-                if arg.name in _reserved_words:
-                    raise ValueError(f"'{arg.name}' is a reserved word and cannot be used as a variable name")
-                
-                if isinstance(arg.type, CelType):
-                    if isinstance(arg.type, ObjectType):
-                        if types.get(arg.type.name):
-                            variables[arg.name] = arg.type.name
-                        else:
-                            pass
-                    else:
-                        variables[arg.name] = arg.type.name
-                        pass
-            elif isinstance(arg, Function):
-                if arg.name in _reserved_words:
-                    raise ValueError(f"'{arg.name}' is a reserved word and cannot be used as a function name")
-
-                if isinstance(arg.overload, Overload):
-                    functions.register(CelFunctionDefinition(name=arg.name,
-                                                                arg_types=arg.overload.args,
-                                                                result_type=arg.overload.result,
-                                                                implementation=arg.overload.get_binding(),
-                                                                is_method=False,
-                                                                expects_cel_values=False))
-                elif isinstance(arg.overload, MemberOverload):
-                    functions.register(CelFunctionDefinition(name=arg.name,
-                                                                arg_types=arg.overload.args,
-                                                                result_type=arg.overload.result,
-                                                                implementation=arg.overload.get_binding(),
-                                                                is_method=True,
-                                                                receiver_type=arg.overload.receiver,
-                                                                expects_cel_values=False))
-                else:
-                    raise ValueError(f"'{arg.name}' is a reserved word and cannot be used as a function name")
-
-            else:
-                raise TypeError(f"'{arg}' is not a function or variable")
+            if isinstance(arg, (Types, NativeTypes)):
+                _process_env_arg(arg, types, variables, functions, registry)
+        
+        # 2. Second pass: Process Variables and Functions that may reference the registered types
+        for arg in args:
+            if not isinstance(arg, (Types, NativeTypes)):
+                _process_env_arg(arg, types, variables, functions, registry)
 
         env = CelEnvWrapper(CelEnv(
             variables=variables,

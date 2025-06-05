@@ -293,6 +293,167 @@ class TypeRegistry:
     def has_type(self, type_name: str) -> bool:
         return type_name in self._message_fields
 
+    def register_native_type(self, native_type: Type[Any]):
+        """Register a native Python type with the CEL type system using reflection."""
+        type_name = native_type.__name__
+        
+        # Add to known packages if it has a module
+        if hasattr(native_type, '__module__') and native_type.__module__:
+            module_parts = native_type.__module__.split('.')
+            if module_parts[0] != '__main__':
+                for i in range(1, len(module_parts) + 1):
+                    self._known_packages.add('.'.join(module_parts[:i]))
+        
+        # Register in CelType registry as CelMessageType (like protobuf messages)
+        CelType.get_or_register_type_instance(type_name, CelMessageType, python_type=native_type)
+        
+        # Extract fields using reflection
+        fields_info: Dict[str, 'CelType'] = {}
+        
+        # Get fields from __init__ method signature
+        if hasattr(native_type, '__init__'):
+            import inspect
+            sig = inspect.signature(native_type.__init__)
+            for param_name, param in sig.parameters.items():
+                if param_name == 'self':
+                    continue
+                    
+                # Try to map Python type hints to CEL types
+                if param.annotation != inspect.Parameter.empty:
+                    cel_type = self._python_type_to_cel_type(param.annotation)
+                    fields_info[param_name] = cel_type
+                else:
+                    # Default to DYN if no type annotation
+                    fields_info[param_name] = CEL_DYN
+        
+        # Also check instance attributes by creating a temporary instance if possible
+        try:
+            # Try to create an instance with dummy values to discover instance attributes
+            sig = inspect.signature(native_type.__init__)
+            dummy_args = {}
+            for param_name, param in sig.parameters.items():
+                if param_name == 'self':
+                    continue
+                # Create dummy values based on type annotations
+                if param.annotation != inspect.Parameter.empty:
+                    if param.annotation == str:
+                        dummy_args[param_name] = ""
+                    elif param.annotation == int:
+                        dummy_args[param_name] = 0
+                    elif param.annotation == float:
+                        dummy_args[param_name] = 0.0
+                    elif param.annotation == bool:
+                        dummy_args[param_name] = False
+                    elif param.annotation == bytes:
+                        dummy_args[param_name] = b""
+                    elif hasattr(param.annotation, '__origin__') and param.annotation.__origin__ == list:
+                        dummy_args[param_name] = []
+                    else:
+                        dummy_args[param_name] = None
+                else:
+                    dummy_args[param_name] = None
+            
+            # Create temporary instance
+            temp_instance = native_type(**dummy_args)
+            
+            # Discover all instance attributes
+            for attr_name in dir(temp_instance):
+                if not attr_name.startswith('_') and attr_name not in fields_info:
+                    # Try to determine the type of the attribute
+                    attr_value = getattr(temp_instance, attr_name, None)
+                    if attr_value is not None:
+                        cel_type = self._python_value_to_cel_type(attr_value)
+                        fields_info[attr_name] = cel_type
+                    else:
+                        fields_info[attr_name] = CEL_DYN
+        except Exception:
+            # If we can't create an instance, fall back to class attributes
+            for attr_name in dir(native_type):
+                if not attr_name.startswith('_') and attr_name not in fields_info:
+                    fields_info[attr_name] = CEL_DYN
+        
+        self._message_fields[type_name] = fields_info
+        # Native types are constructible
+        self._message_constructibility[type_name] = True
+        
+        # Store the Python class - use the same dict as protobuf messages
+        # This ensures is_message_type() will return True for native types
+        self._message_python_classes[type_name] = native_type
+    
+    def _python_value_to_cel_type(self, value: Any) -> 'CelType':
+        """Map Python values to CEL types based on their runtime type."""
+        if isinstance(value, str):
+            return CEL_STRING
+        elif isinstance(value, int):
+            return CEL_INT
+        elif isinstance(value, float):
+            return CEL_DOUBLE
+        elif isinstance(value, bool):
+            return CEL_BOOL
+        elif isinstance(value, bytes):
+            return CEL_BYTES
+        elif isinstance(value, list):
+            # Try to infer element type from first element
+            if value and len(value) > 0:
+                element_type = self._python_value_to_cel_type(value[0])
+                return make_list_type(element_type)
+            return make_list_type(CEL_DYN)
+        elif isinstance(value, dict):
+            # Try to infer key/value types from first item
+            if value:
+                first_key = next(iter(value))
+                first_value = value[first_key]
+                key_type = self._python_value_to_cel_type(first_key)
+                value_type = self._python_value_to_cel_type(first_value)
+                return make_map_type(key_type, value_type)
+            return make_map_type(CEL_DYN, CEL_DYN)
+        else:
+            # For objects, check if it's a registered type
+            type_name = type(value).__name__
+            cel_type = CelType.get_by_name(type_name)
+            if cel_type:
+                return cel_type
+        return CEL_DYN
+    
+    def _python_type_to_cel_type(self, python_type: Type) -> 'CelType':
+        """Map Python types to CEL types."""
+        if python_type == str:
+            return CEL_STRING
+        elif python_type == int:
+            return CEL_INT
+        elif python_type == float:
+            return CEL_DOUBLE
+        elif python_type == bool:
+            return CEL_BOOL
+        elif python_type == bytes:
+            return CEL_BYTES
+        elif hasattr(python_type, '__origin__'):
+            # Handle generic types like List[str], Dict[str, int]
+            origin = python_type.__origin__
+            if origin == list:
+                # Get the element type if available
+                args = getattr(python_type, '__args__', ())
+                if args:
+                    element_type = self._python_type_to_cel_type(args[0])
+                    return make_list_type(element_type)
+                return make_list_type(CEL_DYN)
+            elif origin == dict:
+                # Get key and value types if available
+                args = getattr(python_type, '__args__', ())
+                if len(args) >= 2:
+                    key_type = self._python_type_to_cel_type(args[0])
+                    value_type = self._python_type_to_cel_type(args[1])
+                    return make_map_type(key_type, value_type)
+                return make_map_type(CEL_DYN, CEL_DYN)
+        else:
+            # For other types, check if it's a registered type
+            type_name = getattr(python_type, '__name__', str(python_type))
+            cel_type = CelType.get_by_name(type_name)
+            if cel_type:
+                return cel_type
+                
+        return CEL_DYN
+
     def get_field(self, obj: Any, field_name: str) -> Optional[Any]:
         type_name: Optional[str] = None
         is_proto_message = isinstance(obj, ProtobufMessage)
