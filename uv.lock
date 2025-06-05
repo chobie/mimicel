@@ -392,7 +392,7 @@ wheels = [
 
 [[package]]
 name = "mimicel"
-version = "0.0.1"
+version = "0.0.2.dev1"
 source = { virtual = "." }
 dependencies = [
     { name = "antlr4-python3-runtime" },
@@ -411,6 +411,7 @@ dev = [
 dev = [
     { name = "build" },
     { name = "twine" },
+    { name = "types-protobuf" },
 ]
 
 [package.metadata]
@@ -428,6 +429,7 @@ provides-extras = ["dev"]
 dev = [
     { name = "build", specifier = ">=1.2.2.post1" },
     { name = "twine", specifier = ">=6.1.0" },
+    { name = "types-protobuf", specifier = ">=6.30.2.20250506" },
 ]
 
 [[package]]

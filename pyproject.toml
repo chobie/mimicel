@@ -1,6 +1,6 @@
 [project]
 name = "mimicel"
-version = "0.0.1"
+version = "0.0.2.dev1"
 description = "A CEL (Common Expression Language) compliant expression engine for Python"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -36,4 +36,5 @@ testpaths = ["tests"]
 dev = [
     "build>=1.2.2.post1",
     "twine>=6.1.0",
+    "types-protobuf>=6.30.2.20250506",
 ]
