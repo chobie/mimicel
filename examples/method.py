@@ -53,11 +53,7 @@ def main():
     if err is not None:
         raise err
 
-    out, detail, err = program.eval({
-        'a': 15,
-        'b': "Hello World",
-        'user': user
-    })
+    out, detail, err = program.eval({})
     print("'hello world'.upper() =", out)
 
     # Test contains method
@@ -69,11 +65,7 @@ def main():
     if err2 is not None:
         raise err2
 
-    out2, detail2, err2 = program2.eval({
-        'a': 15,
-        'b': "Hello World",
-        'user': user
-    })
+    out2, detail2, err2 = program2.eval({})
     print("'hello world'.contains('world') =", out2)
 
     # Test with variable
