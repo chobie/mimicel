@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Callable
 
 from cel.expr import syntax_pb2
 
@@ -7,7 +7,7 @@ def expand_all_macro_pb(
     target_expr: syntax_pb2.Expr,
     iter_var_name_str: str,
     predicate_expr: syntax_pb2.Expr,
-    next_id_func: callable
+    next_id_func: Callable
 ) -> syntax_pb2.Expr.Comprehension:
     accu_var_name = f"__all_accu_{next_id_func()}__"
     accu_init_expr = syntax_pb2.Expr(id=next_id_func(), const_expr=syntax_pb2.Constant(bool_value=True))
@@ -36,7 +36,7 @@ def expand_exists_macro_pb(
         target_expr: syntax_pb2.Expr,
         iter_var_name_str: str,
         predicate_expr: syntax_pb2.Expr,
-        next_id_func: callable
+        next_id_func: Callable
 ) -> syntax_pb2.Expr.Comprehension:
     accu_var_name = f"__exists_accu_{next_id_func()}__"
     accu_init_expr = syntax_pb2.Expr(id=next_id_func(), const_expr=syntax_pb2.Constant(bool_value=False))
@@ -65,7 +65,7 @@ def expand_exists_one_macro_pb(
         target_expr: syntax_pb2.Expr,
         iter_var_name_str: str,
         predicate_expr: syntax_pb2.Expr,
-        next_id_func: callable
+        next_id_func: Callable
 ) -> syntax_pb2.Expr.Comprehension:
     """
     Expands e.exists_one(x, p) macro into a ComprehensionExpr.
@@ -219,7 +219,7 @@ def expand_filter_macro_pb(
         target_expr: syntax_pb2.Expr,
         iter_var_name_str: str,
         filter_predicate_expr: syntax_pb2.Expr,  # フィルター述語 p(x)
-        next_id_func: callable
+        next_id_func: Callable
 ) -> syntax_pb2.Expr.Comprehension:
     """
     Expands e.filter(x, p) macro into a ComprehensionExpr.
@@ -277,7 +277,7 @@ def expand_map_macro_pb(
         target_expr: syntax_pb2.Expr,
         iter_var_name_str: str,
         transform_expr: syntax_pb2.Expr,  # 変換式 t(x)
-        next_id_func: callable,
+        next_id_func: Callable,
         filter_predicate_expr: Optional[syntax_pb2.Expr] = None  # オプショナルなフィルター述語 p(x)
 ) -> syntax_pb2.Expr.Comprehension:
     """
