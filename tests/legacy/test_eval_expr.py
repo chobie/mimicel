@@ -1,4 +1,5 @@
 from datetime import timedelta, datetime
+from typing import Any
 
 import pytest
 
@@ -15,7 +16,7 @@ from mimicel.eval_pb import eval_expr_pb
 from mimicel.type_registry import TypeRegistry
 
 
-def eval_expr(expr: str, context_dict: dict = None) -> object:
+def eval_expr(expr: str, context_dict: Any = None) -> object:
     """CEL式をコンパイルして評価し、Pythonのプリミティブ値として返す（CelValueをunwrap）"""
     if isinstance(context_dict, CelEnv):
         context = context_dict
