@@ -1,7 +1,8 @@
 # standard_definitions/helpers.py
 import re2
 from datetime import datetime, timedelta, timezone, tzinfo
-from typing import Optional
+from typing import Optional, Callable, Any
+
 
 # --- Helper Functions (moved from functions.py) ---
 
@@ -83,3 +84,9 @@ def _get_timezone_from_str(tz_name_str: str) -> Optional[tzinfo]:
         # IANA名のサポートを限定的とする。
         raise NotImplementedError(
             f"Full support for IANA timezone name '{tz_name_str}' requires 'zoneinfo' (Python 3.9+) or 'pytz'. Use 'UTC' or fixed offset like '+09:00'.")
+
+
+def as_vararg_callable(fn: Callable) -> Callable[..., Any]:
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        return fn(*args, **kwargs)
+    return wrapper

@@ -36,5 +36,13 @@ testpaths = ["tests"]
 dev = [
     "build>=1.2.2.post1",
     "twine>=6.1.0",
+    "ty>=0.0.1a8",
     "types-protobuf>=6.30.2.20250506",
 ]
+
+[tool.ty.src]
+root = "./mimicel"
+
+[tool.ty.rules]
+unresolved-import = "ignore"
+division-by-zero = "ignore"
