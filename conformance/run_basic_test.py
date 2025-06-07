@@ -1,7 +1,7 @@
 import os
 import sys
 import traceback
-from typing import Optional
+from typing import Optional, Callable
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -528,7 +528,7 @@ def _print_test_failure_details(tc: simple_pb2.SimpleTest,
 
 
 def run_tests_from_textproto(textproto_file_path: str,
-                             cel_evaluator_func: callable,
+                             cel_evaluator_func: Callable,
                              verbose: bool = False,
                              fail_fast: bool = False):
     if not os.path.exists(textproto_file_path):

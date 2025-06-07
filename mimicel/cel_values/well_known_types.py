@@ -1,3 +1,4 @@
+import re2
 import math
 import traceback
 from datetime import timedelta, datetime, timezone
@@ -1296,7 +1297,7 @@ def _parse_timezone_string(tz_cel: Optional[CelString]) -> timezone:
     except Exception:
         pass
 
-    offset_match = re.fullmatch(r"([+-])?(\d{2}):(\d{2})", tz_str)
+    offset_match = re2.fullmatch(r"([+-])?(\d{2}):(\d{2})", tz_str)
     if offset_match:
         sign_char, hours_str, minutes_str = offset_match.groups()
         try:
@@ -2359,7 +2360,7 @@ class CelProtobufAny(CelValue):
         self._type_registry_accessor = None  # 遅延初期化または外部から設定
 
     # TypeRegistryへのアクセサを設定するメソッド (オプション)
-    def set_type_registry_accessor(self, accessor: callable):
+    def set_type_registry_accessor(self, accessor: Callable):
         # accessor は (type_name: str) -> Optional[Type[ProtobufMessage]] のような関数を期待
         self._type_registry_accessor = accessor
 
@@ -2456,7 +2457,7 @@ class CelProtobufAny(CelValue):
 # と同様のロジックを持つヘルパー関数。Anyのアンパック部分を除いて共通化できる。
 # この関数は CelProtobufAny の外部か、共通のユーティリティモジュールに配置する。
 def _compare_raw_protos_cel_semantics(msg1: Message, msg2: Message,
-                                      any_unpacker: Optional[callable] = None) -> bool:
+                                      any_unpacker: Optional[Callable] = None) -> bool:
     if msg1.DESCRIPTOR != msg2.DESCRIPTOR: return False  # 基本的な型チェック
 
     for field_desc in msg1.DESCRIPTOR.fields:
