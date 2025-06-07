@@ -1,7 +1,7 @@
 import os
 import sys
 import traceback
-from typing import Optional, Callable
+from typing import Optional, Callable, Any
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -243,7 +243,7 @@ def _proto_list_value_to_py_list(list_val_msg: ListValue, type_registry_for_any:
     return py_list
 
 
-def _proto_value_to_py_native(value_proto: Value, type_registry_for_any: Optional[TypeRegistry]) -> PbAny_type:
+def _proto_value_to_py_native(value_proto: Value, type_registry_for_any: Optional[TypeRegistry]) -> Any:
     """ google.protobuf.Value を Python ネイティブ値に変換するヘルパー """
     kind = value_proto.WhichOneof('kind')
     if kind == 'null_value':

@@ -59,7 +59,7 @@ class CelProtobufValue(CelValue):
         self._pb_value = pb_value_instance
 
     @classmethod
-    def from_native(cls, native_value: any) -> 'CelProtobufValue':
+    def from_native(cls, native_value: Any) -> 'CelProtobufValue':
         pb_val = PbValue()
         if native_value is None:
             pb_val.null_value = PbNullValue.NULL_VALUE

@@ -46,3 +46,4 @@ root = "./mimicel"
 [tool.ty.rules]
 unresolved-import = "ignore"
 division-by-zero = "ignore"
+possibly-unbound-attribute = "ignore"
